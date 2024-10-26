@@ -1,0 +1,5 @@
+// DESCRIPTION: Verilator output: Waivers generated with --waiver-output
+
+`verilator_config
+
+lint_off -rule MULTIDRIVEN -file "*/apb_lfsr_regblock.sv" -match "*"

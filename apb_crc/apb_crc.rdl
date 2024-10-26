@@ -1,0 +1,28 @@
+
+addrmap apb_crc{
+    name = "APB CRC slave";
+
+    reg {
+        field {
+            name = "Write data";
+            hw = r; sw = w;
+            swmod;
+        } data[32];
+    } write @ 0x00;
+
+    reg {
+        field {
+            name = "Read value";
+            hw=w; sw=r;
+        } data[32] = 0;
+    } read @ 0x04;
+
+    // reg {
+    //     name = "Control Status Register";
+    //     field {
+    //         name = "CRC Done";
+    //         hw=w; sw=r;
+    //     } done[1] = 0;
+    // } csr @ 0x08;
+
+};
