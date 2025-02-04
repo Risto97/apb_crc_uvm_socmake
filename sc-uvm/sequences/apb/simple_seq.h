@@ -29,14 +29,7 @@ public:
         for(int i = 0; i < 100; i++){
             ARCHI_WRITE(0, i*5);
             ARCHI_READ(4);
-
         }
-        // sc_core::wait(1000, sc_core::SC_NS);
-        // ARCHI_READ(4);
-        // sc_core::wait(1000, sc_core::SC_NS);
-        // ARCHI_READ(4);
-        // sc_core::wait(1000, sc_core::SC_NS);
-        // ARCHI_READ(4);
 
         UVM_INFO(this->get_name(), "Finishing sequence", uvm::UVM_MEDIUM);
     };

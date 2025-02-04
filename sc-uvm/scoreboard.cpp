@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <sstream>
 #include <tlm_core/tlm_2/tlm_generic_payload/tlm_gp.h>
+#include <uvmsc/base/uvm_object_globals.h>
 
 std::array<std::string, 3> stringify_tlm_command = {
     "TLM_READ_COMMAND",
@@ -59,18 +60,29 @@ void scoreboard::apb_write(const uvc::apb::rw &p) {
         uint8_t  *ptr = trans->get_data_ptr();
         uint32_t rdata = *(uint32_t*)ptr;
 
+        // uvm::UVM_INFO(this->get_name(), "Match between DUT and REF model\n")
+        std::stringstream msg;
+        msg << "Command: " << stringify_tlm_command.at(cmd) << "\n";
+        msg << "Address: 0x" << std::hex << p.addr << std::endl;
+        msg << "## Data:\n";
+        msg << "    Dut: 0x" << std::hex << p.data.to_uint() << "\n";
+        msg << "    Ref: 0x" << std::hex << rdata << std::endl;
+
         if(rdata != p.data){
-            std::stringstream msg;
-            msg << "\033[1;31m"; // BOLD RED COLOUR
-            msg << "****** MISMATCH *******\n";
-            msg << "Command: " << stringify_tlm_command.at(cmd) << "\n";
-            msg << "Address: 0x" << std::hex << p.addr << std::endl;
-            msg << "## Mismatch Data:\n";
-            msg << "    Dut: 0x" << std::hex << p.data.to_uint() << "\n";
-            msg << "    Ref: 0x" << std::hex << rdata << std::endl;
-            msg << "\033[0m\n";
+            std::stringstream error_msg;
+            error_msg << "\033[1;31m"; // BOLD RED COLOUR
+            error_msg << "****** MISMATCH *******\n";
+            error_msg << msg.str();
+            error_msg << "\033[0m\n";
             
-            UVM_ERROR(this->get_name(), "Mismatch between DUT and REF model\n" + msg.str());
+            UVM_ERROR(this->get_name(), "Mismatch between DUT and REF model\n" + error_msg.str());
+        } else{
+            std::stringstream ok_msg;
+            ok_msg << "****** MATCH *******\n";
+            ok_msg << msg.str();
+            
+            UVM_INFO(this->get_name(), "Match between DUT and REF model\n" + ok_msg.str(), uvm::UVM_HIGH);
+
         }
 
     }

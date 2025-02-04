@@ -34,6 +34,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     SystemC::systemc
     UVM-SystemC::shared
     CRCpp
+    clipp::clipp
 
     # Internal UVM components
     apb
@@ -51,5 +52,10 @@ target_compile_options(${PROJECT_NAME} PUBLIC
 if(SIM_TRACE)
     target_compile_definitions(${PROJECT_NAME} PUBLIC TRACE VERILATOR)
 endif()
+
+enable_testing()
+foreach(test IN LISTS UVM_TESTS)
+    add_test(NAME ${test} COMMAND ./apb_crc_sc_uvm --UVM-TEST ${test})
+endforeach()
 
 help()

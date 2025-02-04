@@ -3,15 +3,15 @@
 #include "env.h"
 #include "simple_seq.h"
 
-class simple_test : public base_test {
+class stress_test : public base_test {
 public:
 
-    simple_test(uvm::uvm_component_name name) : 
+    stress_test(uvm::uvm_component_name name) : 
         base_test(name) {
 
     }
 
-    UVM_COMPONENT_UTILS(simple_test);
+    UVM_COMPONENT_UTILS(stress_test);
 
 
 virtual void run_phase(uvm::uvm_phase &phase){
