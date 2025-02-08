@@ -17,7 +17,6 @@ class base_test extends uvm_test;
 
     task run_phase(uvm_phase phase);
         phase.raise_objection(this);
-      `uvm_info("+++++++++++++:", "IT SHOULD RUN HERE", UVM_LOW);
         phase.phase_done.set_drain_time(this, 1000000);
         wait(1us);
         phase.drop_objection(this);
@@ -37,15 +36,10 @@ class simple_test extends base_test;
 
   virtual function void build_phase(uvm_phase phase);
   begin
-      `uvm_info("+++++++++++++:", "HELLLOOOOO", UVM_LOW);
     uvm_config_db#(uvm_object_wrapper)::set(this,
 		    "env.ag.apb_sqr.run_phase", 
 			       "default_sequence",
 				simple_sequence::type_id::get());
-    // uvm_config_db#(uvm_object_wrapper)::set(this,
-		  //   "ubus_example_tb0.ubus0.slaves[0].sequencer.run_phase", 
-			 //       "default_sequence",
-				// slave_memory_seq::type_id::get());
     // Create the tb
     super.build_phase(phase);
   end
@@ -59,3 +53,31 @@ class simple_test extends base_test;
   endfunction : end_of_elaboration_phase
 
 endclass : simple_test
+
+class smoke_test extends base_test;
+
+  `uvm_component_utils(smoke_test)
+
+  function new(string name = "smoke_test", uvm_component parent=null);
+    super.new(name,parent);
+  endfunction : new
+
+  virtual function void build_phase(uvm_phase phase);
+  begin
+    uvm_config_db#(uvm_object_wrapper)::set(this,
+		    "env.ag.apb_sqr.run_phase", 
+			       "default_sequence",
+				smoke_sequence::type_id::get());
+    // Create the tb
+    super.build_phase(phase);
+  end
+  endfunction : build_phase
+
+  virtual function void end_of_elaboration_phase(uvm_phase phase);
+  begin
+    // uvm_top.print_topology();
+
+  end
+  endfunction : end_of_elaboration_phase
+
+endclass : smoke_test

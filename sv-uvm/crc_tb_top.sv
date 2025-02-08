@@ -30,7 +30,7 @@ module crc_tb_top;
 
       uvm_config_db#(virtual apb_if)::set(cs_.get_root(), "*", "vif", vif);
       // uvm_config_db#(virtual apb_crc)::set(cs_.get_root(), "*", "dut", dut);
-      run_test("simple_test");
+      run_test();
     end
 
     // initial begin

@@ -4,11 +4,13 @@ project(apb_crc_sv_uvm NONE)
 include(deps/deps.cmake)
 
 option_boolean(SIM_TRACE "Enable VCD file tracing" OFF)
+option_enum(SIMULATOR "Which simulator to use" "questa;modelsim;xcelium;vcs" "xcelium")
+option_enum(UVM_VERBOSITY "UVM verbosity level for default target" "UVM_NONE;UVM_LOW;UVM_MEDIUM;UVM_HIGH;UVM_DEBUG" "UVM_MEDIUM")
 
 
-add_subdirectory("../apb_crc/" "dut")
 
-add_ip(crc_tb_top)
+add_ip(crc_tb_top
+    DESCRIPTION "UVM testbench for APB CRC accellerator")
 
 ip_sources(${IP} SYSTEMVERILOG
     crc_tb_top.sv
@@ -17,10 +19,11 @@ ip_include_directories(${IP} SYSTEMVERILOG
     .
     )
 
+add_subdirectory("../apb_crc/" "dut")
 add_subdirectory(apb)
 add_subdirectory(uvm_tests)
 add_subdirectory(sequences)
-# add_subdirectory(crc_dpi)
+add_subdirectory(crc_dpi)
 ip_link(${IP}
     accellera::sv_uvm::core
     apb_agent 
@@ -28,23 +31,47 @@ ip_link(${IP}
     uvm_tests
     apb_crc
 
-    # crc_dpi
+    crc_dpi
     )
-
-
-ip_compile_definitions(${IP} SYSTEMVERILOG
-    UVM_NO_DPI
-    # QUESTA
-    # INCA
-    # NO_RAND
-    )
-
-# modelsim(${IP} 
-    # LIBRARY work)
 
 xcelium(${IP}
-    XMELAB_ARGS -TIMESCALE 10ns/1ps
+    SV_COMPILE_ARGS -NOWARN SRCDEPR -NOWARN TSNPK -NOWARN FUNTSK
+    ELABORATE_ARGS -TIMESCALE 10ns/1ps
+    NO_RUN_TARGET
+    # LIBRARY worklib
     )
-# vivado_sim(${IP})
+
+modelsim(${IP} QUIET
+    NO_RUN_TARGET
+    )
+
+vcs(${IP}
+    NO_RUN_TARGET
+)
+
+foreach(test ${UVM_TESTS})
+    xcelium(${IP}
+        RUN_ARGS +UVM_TESTNAME=${test}
+                 +UVM_VERBOSITY=${UVM_VERBOSITY}
+        RUN_TARGET_NAME run_${test}_xcelium
+        # LIBRARY worklib
+    )
+
+    modelsim(${IP} QUIET
+        RUN_ARGS +UVM_TESTNAME=${test}
+                 +UVM_VERBOSITY=${UVM_VERBOSITY}
+        RUN_TARGET_NAME run_${test}_modelsim
+    )
+
+    vcs(${IP}
+        RUN_ARGS +UVM_TESTNAME=${test}
+                 +UVM_VERBOSITY=${UVM_VERBOSITY}
+        RUN_TARGET_NAME run_${test}_vcs
+    )
+
+    # add_test(NAME run_${test}
+    #     COMMAND make run_${test}
+    #     )
+endforeach()
 
 help()

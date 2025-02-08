@@ -1,4 +1,4 @@
-// import "DPI-C" function int unsigned  crc_dpi(input int unsigned data, input int unsigned initial_value);
+import "DPI-C" function int unsigned  crc_dpi(input int unsigned data, input int unsigned initial_value);
 
 class scoreboard extends uvm_scoreboard;
 
@@ -27,7 +27,7 @@ class scoreboard extends uvm_scoreboard;
   // write
   virtual function void write(apb_rw trans);
         if(trans.kind_e == WRITE) begin
-        //       crc_dpi_data = crc_dpi(trans.data, crc_dpi_data);
+              crc_dpi_data = crc_dpi(trans.data, crc_dpi_data);
         end else if(trans.kind_e == READ) begin
 
 

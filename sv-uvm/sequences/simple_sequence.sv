@@ -51,7 +51,6 @@ endclass : base_sequence
 //
 //------------------------------------------------------------------------------
 
-// import "DPI-C" function int  myCFunc1();
 class simple_sequence extends base_sequence;
 
   function new(string name="simple_sequence");
@@ -71,9 +70,35 @@ class simple_sequence extends base_sequence;
       // iA = myCFunc1();
 
         for(int i = 0; i < 100000; i++) begin
-          ARCHI_WRITE(0, i*5);
+          ARCHI_WRITE(0, $urandom());
           ARCHI_READ(4, data);
         end
   endtask
   
 endclass : simple_sequence
+
+class smoke_sequence extends base_sequence;
+
+  function new(string name="smoke_sequence");
+    super.new(name);
+  endfunction
+  
+  `uvm_object_utils(smoke_sequence)
+
+  int data;
+  // integer iA;
+
+  virtual task body();
+
+      ARCHI_WRITE(0, 12);
+      ARCHI_READ(4, data);
+
+      // iA = myCFunc1();
+
+        for(int i = 0; i < 1; i++) begin
+          ARCHI_WRITE(0, i*5);
+          ARCHI_READ(4, data);
+        end
+  endtask
+  
+endclass : smoke_sequence
