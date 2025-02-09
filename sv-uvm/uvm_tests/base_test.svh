@@ -1,4 +1,4 @@
-`include "env.sv"
+`include "env.svh"
 
 class base_test extends uvm_test;
 

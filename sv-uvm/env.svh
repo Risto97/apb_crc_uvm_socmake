@@ -1,9 +1,9 @@
-`include "scoreboard.sv"
+`include "scoreboard.svh"
 // `include "apb_master_seq_lib.sv"
 // `include "apb_example_master_seq_lib.sv"
 // `include "apb_slave_seq_lib.sv"
 
-`include "simple_sequence.sv"
+`include "simple_sequence.svh"
 
 class env extends uvm_env;
 

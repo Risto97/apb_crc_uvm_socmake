@@ -4,16 +4,18 @@ project(apb_crc_sv_uvm NONE)
 include(deps/deps.cmake)
 
 option_boolean(SIM_TRACE "Enable VCD file tracing" OFF)
-option_enum(SIMULATOR "Which simulator to use" "questa;modelsim;xcelium;vcs" "xcelium")
+option_enum(SIMULATOR "Which simulator to use" "questa;xcelium;vcs" "xcelium")
 option_enum(UVM_VERBOSITY "UVM verbosity level for default target" "UVM_NONE;UVM_LOW;UVM_MEDIUM;UVM_HIGH;UVM_DEBUG" "UVM_MEDIUM")
-
 
 
 add_ip(crc_tb_top
     DESCRIPTION "UVM testbench for APB CRC accellerator")
 
 ip_sources(${IP} SYSTEMVERILOG
-    crc_tb_top.sv
+        crc_tb_top.sv
+    HEADERS
+        ./scoreboard.svh
+        ./env.svh
     )
 ip_include_directories(${IP} SYSTEMVERILOG
     .
@@ -34,44 +36,59 @@ ip_link(${IP}
     crc_dpi
     )
 
-xcelium(${IP}
-    SV_COMPILE_ARGS -NOWARN SRCDEPR -NOWARN TSNPK -NOWARN FUNTSK
-    ELABORATE_ARGS -TIMESCALE 10ns/1ps
-    NO_RUN_TARGET
-    # LIBRARY worklib
-    )
+if(SIMULATOR STREQUAL "xcelium")
+    xcelium(${IP}
+        SV_COMPILE_ARGS -NOWARN SRCDEPR -NOWARN TSNPK -NOWARN FUNTSK
+        ELABORATE_ARGS -TIMESCALE 10ns/1ps
+        NO_RUN_TARGET
+        )
+endif()
 
-modelsim(${IP} QUIET
-    NO_RUN_TARGET
-    )
+if(SIMULATOR STREQUAL "questa")
+    modelsim(${IP} QUIET
+        NO_RUN_TARGET
+        )
+endif()
 
-vcs(${IP}
-    NO_RUN_TARGET
-)
+if(SIMULATOR STREQUAL "vcs")
+    vcs(${IP}
+        ELABORATE_ARGS -ntb_opts uvm
+        NO_RUN_TARGET
+    )
+endif()
+
+# vivado_sim(${IP}
+#     NO_RUN_TARGET
+#     )
 
 foreach(test ${UVM_TESTS})
-    xcelium(${IP}
-        RUN_ARGS +UVM_TESTNAME=${test}
-                 +UVM_VERBOSITY=${UVM_VERBOSITY}
-        RUN_TARGET_NAME run_${test}_xcelium
-        # LIBRARY worklib
-    )
+    if(SIMULATOR STREQUAL "xcelium")
+        xcelium(${IP}
+            RUN_ARGS +UVM_TESTNAME=${test}
+                     +UVM_VERBOSITY=${UVM_VERBOSITY}
+            RUN_TARGET_NAME run_${test}_xcelium
+        )
+    endif()
 
-    modelsim(${IP} QUIET
-        RUN_ARGS +UVM_TESTNAME=${test}
-                 +UVM_VERBOSITY=${UVM_VERBOSITY}
-        RUN_TARGET_NAME run_${test}_modelsim
-    )
+    if(SIMULATOR STREQUAL "questa")
+        modelsim(${IP} QUIET
+            RUN_ARGS +UVM_TESTNAME=${test}
+                     +UVM_VERBOSITY=${UVM_VERBOSITY}
+            RUN_TARGET_NAME run_${test}_modelsim
+        )
+    endif() 
 
-    vcs(${IP}
-        RUN_ARGS +UVM_TESTNAME=${test}
-                 +UVM_VERBOSITY=${UVM_VERBOSITY}
-        RUN_TARGET_NAME run_${test}_vcs
-    )
+    if(SIMULATOR STREQUAL "vcs")
+        vcs(${IP}
+            RUN_ARGS +UVM_TESTNAME=${test}
+                     +UVM_VERBOSITY=${UVM_VERBOSITY}
+            RUN_TARGET_NAME run_${test}_vcs
+        )
+    endif()
 
-    # add_test(NAME run_${test}
-    #     COMMAND make run_${test}
-    #     )
+    add_test(NAME run_${test}
+        COMMAND make run_${test}
+        )
 endforeach()
 
 help()

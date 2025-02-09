@@ -6,7 +6,7 @@
 module crc_tb_top;
     import uvm_pkg::*;
     import apb_pkg::*;
-    `include "base_test.sv" 
+    `include "base_test.svh" 
 
     apb_if vif();
 
